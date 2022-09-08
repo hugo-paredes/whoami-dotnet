@@ -1,24 +1,31 @@
 #addin nuget:?package=Cake.Docker&version=1.1.2
+// #addin nuget:?package=Cake.Git&version=2.0.0
+#tool "dotnet:?package=GitVersion.Tool"
 
-var target = Argument("target", "Build");
-var configuration = Argument("configuration", "Release");
+var target = Argument("target", "Default");
+var tag = "v0.0.0";
 
-Task("Clean")
-    .WithCriteria(c => HasArgument("rebuild"))
+Task("Tag")
     .Does(() =>
 {
-    CleanDirectory($"./src/HostApp/bin/{configuration}");
+    // tag = describe --tags;
+    Console.WriteLine("Hello");
+    var settings = new GitVersionSettings {
+        OutputType = GitVersionOutput.BuildServer
+    };
+    // DockerRun()
+    Console.WriteLine("Git: " + tag);
 });
-
-Task("Build")
-    .IsDependentOn("Clean")
+Task("DockerBuild")
     .Does(() =>
 {
-    DotNetBuild("./Whoami.sln", new DotNetBuildSettings
-    {
-        Configuration = configuration,
-    });
+    Console.WriteLine("World");
+    var settings = new DockerImageBuildSettings { Tag = new[] { "whoami-dotnet:0.0.0" }};
+    DockerBuild(settings, "./");
 });
 
+Task("Default")
+    .IsDependentOn("Tag")
+    .IsDependentOn("DockerBuild");
 
 RunTarget(target);
